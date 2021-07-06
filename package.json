@@ -1,0 +1,6 @@
+{
+  "name": "hardhat-project",
+  "dependencies": {
+    "openzeppelin-solidity": "^4.1.0"
+  }
+}
