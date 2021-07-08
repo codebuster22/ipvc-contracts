@@ -2,4 +2,6 @@ node_modules
 
 #Hardhat files
 cache
-artifacts
+artifacts/build-info/
+artifacts/openzeppelin-solidity/
+**.dbg.json
