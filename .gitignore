@@ -5,3 +5,5 @@ cache
 artifacts/build-info/
 artifacts/openzeppelin-solidity/
 **.dbg.json
+coverage/
+coverage.json
