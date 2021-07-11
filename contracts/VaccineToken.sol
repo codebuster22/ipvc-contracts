@@ -4,6 +4,9 @@ pragma solidity ^0.8.0;
 
 import "./utils/ERC721.sol";
 
+
+
+
 contract VaccineToken is ERC721 {
 
     string constant version = "0.1.0";
