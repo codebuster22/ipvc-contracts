@@ -2,8 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-
-
+import "../VaccineToken.sol";
 
 contract IPVC {
 
@@ -29,6 +28,7 @@ contract IPVC {
         bytes32[] vaccinators;
         address   admin;
         bytes     verifing_uri;
+        uint8     ipvc_approved;
     }
     // ipvc_country_authority_id => CountryAuthority
     mapping(bytes32 => CountryAuthority) country_authorities;
