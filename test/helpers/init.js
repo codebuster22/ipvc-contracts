@@ -6,14 +6,27 @@ const setup = async () => {
             root: signers[0],
             beneficiary1: signers[1],
             beneficiary2: signers[2],
-            others: signers.slice(3)
+            others: signers.slice(3),
         },
-        data: {}
+        generateRandomGene,
+        data: {},
     };
 };
 
-const Token = async (setup) => await ethers.getContractFactory('Token', setup.roles.root);
+const Warriors = async (setup) => await ethers.getContractFactory("Warriors", setup.roles.root);
 
-const IPVC = async (setup) => await ethers.getContractFactory('Controller', setup.roles.root);
+const IPVC = async (setup) => await ethers.getContractFactory("Controller", setup.roles.root);
 
-module.exports = {setup, Token, IPVC};
+const generateRandomDigits = (numberOfDigits, maxValue) => Math.floor(Math.random() * 10 ** numberOfDigits) % maxValue;
+
+const generateRandomGene = () => {
+    const country = generateRandomDigits(3, 200);
+    const layer1 = generateRandomDigits(2, 100);
+    const layer2 = generateRandomDigits(2, 100);
+    const layer3 = generateRandomDigits(2, 100);
+    const layer4 = generateRandomDigits(2, 100);
+    const layer5 = generateRandomDigits(2, 100);
+    return `${country}${layer1}${layer2}${layer3}${layer4}${layer5}`;
+};
+
+module.exports = { setup, Warriors, IPVC };
