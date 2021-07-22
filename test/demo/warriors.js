@@ -13,9 +13,9 @@ const deploy = async () => {
     return setup;
 };
 
-describe("Contract: Token", async () => {
+describe("Contract: Warriors", async () => {
     let setup;
-    context("Deploy Token COntract", async () => {
+    context("Deploy Contract", async () => {
         before("!! init setup", async () => {
             setup = await deploy();
             setup.ipvc = await setup.IPVC.deploy();
@@ -60,7 +60,7 @@ describe("Contract: Token", async () => {
                 ).to.revertedWith("Warriors: Only controller can access this function");
             });
         });
-        it("correct values", async () => {
+        it("generate warrior with correct values", async () => {
             setup.data.gene1 = setup.generateRandomGene();
             await expect(
                 setup.warriors
@@ -69,6 +69,45 @@ describe("Contract: Token", async () => {
             )
                 .to.emit(setup.warriors, "WarriorGenerated")
                 .withArgs(setup.roles.beneficiary1.address, "0");
+            expect(await setup.warriors.ownerOf(0)).to.equal(setup.roles.beneficiary1.address);
+            expect((await setup.warriors.balanceOf(setup.roles.beneficiary1.address)).toString()).to.equal("1");
+        });
+    });
+    context(">> updateController", async () => {
+        context("caller is not controller", async () => {
+            it("reverts", async () => {
+                await expect(
+                    setup.warriors.connect(setup.roles.beneficiary1).updateController(setup.roles.beneficiary1.address)
+                ).to.revertedWith("Warriors: Only controller can access this function");
+            });
+        });
+        context("controller is zero address", async () => {
+            it("reverts", async () => {
+                await expect(
+                    setup.warriors.connect(setup.roles.root).updateController(constants.ZERO_ADDRESS)
+                ).to.revertedWith("Warriors: controller cannot be address zero");
+            });
+        });
+        context("caller is controller", async () => {
+            it("reverts", async () => {
+                await setup.warriors.connect(setup.roles.root).updateController(setup.roles.beneficiary1.address);
+                expect(await setup.warriors.controller()).to.equal(setup.roles.beneficiary1.address);
+            });
+        });
+    });
+    context("# getter functions", async () => {
+        context(">> getWarrior", async () => {
+            it("returns correct warrior", async () => {
+                expect((await setup.warriors.getWarrior(0)).toString()).to.equal(setup.data.gene1);
+            });
+            it("reverts when warrior doesn't exists", async () => {
+                await expect(setup.warriors.getWarrior(1)).to.revertedWith("Warriors: warrior does not exist");
+            });
+        });
+        context(">> total warriors", async () => {
+            it("returns correct", async () => {
+                expect((await setup.warriors.warriorCounter()).toString()).to.equal("1");
+            });
         });
     });
 });
