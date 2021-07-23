@@ -6,7 +6,8 @@ const setup = async () => {
             root: signers[0],
             beneficiary1: signers[1],
             beneficiary2: signers[2],
-            others: signers.slice(3),
+            origin: signers[3],
+            others: signers.slice(4),
         },
         generateRandomGene,
         data: {},
@@ -15,7 +16,9 @@ const setup = async () => {
 
 const Warriors = async (setup) => await ethers.getContractFactory("Warriors", setup.roles.root);
 
-const IPVC = async (setup) => await ethers.getContractFactory("Controller", setup.roles.root);
+const Controller = async (setup) => await ethers.getContractFactory("Controller", setup.roles.root);
+
+const GeneGenerator = async (setup) => await ethers.getContractFactory("WarriorGeneGenerator", setup.roles.root);
 
 const generateRandomDigits = (numberOfDigits, maxValue) => Math.floor(Math.random() * 10 ** numberOfDigits) % maxValue;
 
@@ -29,4 +32,4 @@ const generateRandomGene = () => {
     return `${country}${layer1}${layer2}${layer3}${layer4}${layer5}`;
 };
 
-module.exports = { setup, Warriors, IPVC };
+module.exports = { setup, Warriors, Controller, GeneGenerator };
