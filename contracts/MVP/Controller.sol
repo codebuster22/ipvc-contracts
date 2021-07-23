@@ -39,7 +39,8 @@ contract Controller is SignatureHelper {
         require(
             recoverSigner(ethSignedMessageHash, _signature) == origin,
             "Controller: invalid origin"
-        )
+        );
+        _;
     }
 
     constructor () {
@@ -52,10 +53,8 @@ contract Controller is SignatureHelper {
         address _warriorGeneGeneratorContract
     ) public onlyAdmin() {
         require(
-            _origin != address(0) 
-            && 
-            _warriorsContract != address(0) 
-            && 
+            _origin != address(0) &&
+            _warriorsContract != address(0) &&
             _warriorGeneGeneratorContract != address(0),
             "Controller: zero address not allowed"
         );
@@ -65,13 +64,29 @@ contract Controller is SignatureHelper {
         isInitialized = 1;
     }
 
+    function updateOrigin(address _newOrigin) external onlyAdmin{
+        require(
+            _newOrigin != address(0),
+            "Controller: origin cannot be zero address"
+        );
+        origin = _newOrigin;
+    }
+
+    function updateGeneGenerator(address _newGeneGenerator) external onlyAdmin{
+        require(
+            _newGeneGenerator != address(0),
+            "Controller: gene generator cannot be zero address"
+        );
+        warriorGeneGeneratorContract = _newGeneGenerator;
+    }
+
     function generateWarrior(
         address _owner,
         uint256 _gene,
         bytes memory _metadata,
         bytes memory _originSignature
     ) public onlyOrigin(_owner, _metadata, _originSignature) {
-        Warriors(warriorsContract).generateWarrior(gene, _owner);
+        Warriors(warriorsContract).generateWarrior(_gene, _owner);
     }
 
     function generateHash(
