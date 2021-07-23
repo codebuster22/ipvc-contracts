@@ -8,7 +8,7 @@ const deploy = async () => {
 
     setup.Warriors = await init.Warriors(setup);
 
-    setup.IPVC = await init.IPVC(setup);
+    setup.Controller = await init.Controller(setup);
 
     return setup;
 };
@@ -18,7 +18,6 @@ describe("Contract: Warriors", async () => {
     context("Deploy Contract", async () => {
         before("!! init setup", async () => {
             setup = await deploy();
-            setup.ipvc = await setup.IPVC.deploy();
         });
         context("controller address is zero address", async () => {
             it(">> reverts", async () => {
