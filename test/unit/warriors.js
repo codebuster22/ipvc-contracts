@@ -1,7 +1,8 @@
 /* eslint-disable no-undef */
 const { expect } = require("chai");
-const { constants } = require("@openzeppelin/test-helpers");
+const { constants, BN } = require("@openzeppelin/test-helpers");
 const init = require("../helpers/init");
+const { BigNumber } = require("ethers");
 
 const deploy = async () => {
     const setup = await init.setup();
@@ -15,6 +16,8 @@ const deploy = async () => {
 
 describe("Contract: Warriors", async () => {
     let setup;
+    let prevPop = 14020;
+    let totalPop = new BigNumber.from(0);
     context("Deploy Contract", async () => {
         before("!! init setup", async () => {
             setup = await deploy();
@@ -33,6 +36,30 @@ describe("Contract: Warriors", async () => {
             });
         });
     });
+    // context(">> calculateNextPopulation", async () => {
+        // it("iterates over calculation for multiple rounds", async () => {
+        //     let i = 0;
+        //     const exists = {};
+        //     const repeatingPop = [];
+        //     totalPop = totalPop.add(new BigNumber.from(14020));
+        //     let lowest = 14020;
+        //     console.log("generation "+(i), 14020);
+        //     while(parseInt(totalPop.toString()) < 27000000){
+        //         let newPop = await setup.warriors.testCalculateNextGenPopulation(prevPop);
+        //         if(parseInt(totalPop.add(newPop).toString())> 27000000){
+        //             newPop = new BigNumber.from(27000000 - parseInt(totalPop.toString()));
+        //         }
+        //         lowest = lowest > parseInt(newPop.toString()) ? parseInt(newPop.toString()) : lowest;
+        //         totalPop = totalPop.add(newPop);
+        //         console.log("generation "+(i+1), newPop.toString());
+        //         prevPop = newPop;
+        //         i++;
+        //     }
+        //     console.log(totalPop.toString());
+        //     console.log(repeatingPop);
+        //     console.log(lowest);
+        // });
+    // });
     context(">> generateWarrior", async () => {
         context("gene is 0", async () => {
             it("reverts", async () => {
@@ -76,20 +103,20 @@ describe("Contract: Warriors", async () => {
         context("caller is not controller", async () => {
             it("reverts", async () => {
                 await expect(
-                    setup.warriors.connect(setup.roles.beneficiary1).updateController(setup.roles.beneficiary1.address)
+                    setup.warriors.connect(setup.roles.beneficiary1).setController(setup.roles.beneficiary1.address)
                 ).to.revertedWith("Warriors: Only controller can access this function");
             });
         });
         context("controller is zero address", async () => {
             it("reverts", async () => {
                 await expect(
-                    setup.warriors.connect(setup.roles.root).updateController(constants.ZERO_ADDRESS)
+                    setup.warriors.connect(setup.roles.root).setController(constants.ZERO_ADDRESS)
                 ).to.revertedWith("Warriors: controller cannot be address zero");
             });
         });
         context("caller is controller", async () => {
             it("reverts", async () => {
-                await setup.warriors.connect(setup.roles.root).updateController(setup.roles.beneficiary1.address);
+                await setup.warriors.connect(setup.roles.root).setController(setup.roles.beneficiary1.address);
                 expect(await setup.warriors.controller()).to.equal(setup.roles.beneficiary1.address);
             });
         });

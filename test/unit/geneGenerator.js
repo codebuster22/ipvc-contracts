@@ -23,14 +23,15 @@ describe("Contract: WarriorGeneGenerator", async () => {
             setup = await deploy();
         });
         it("deploys gene generator", async () => {
-            setup.geneGenerator = await setup.GeneGenerator.deploy();
+            setup.geneGenerator = await setup.GeneGenerator.deploy(setup.roles.root.address);
             expect(await setup.geneGenerator.controller()).to.equal(setup.roles.root.address);
         });
     });
     context(">> generate genes", async () => {
         it("generates gene with 5 attributes", async () => {
-            const metadata = ethers.utils.id(Math.random().toString());
-            expect((await setup.geneGenerator.geneGenerator(metadata)).toString().length).to.equal(10);
+            const metadata = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(Math.random().toString()));
+            console.log((await setup.geneGenerator.geneGenerator(0,metadata)).toString());
+            expect((await setup.geneGenerator.geneGenerator(1,metadata)).toString().length).to.equal(76);
         });
     });
     context(">> controller functionality", async () => {

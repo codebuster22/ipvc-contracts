@@ -7,7 +7,7 @@ const setup = async () => {
             beneficiary1: signers[1],
             beneficiary2: signers[2],
             origin: signers[3],
-            others: signers.slice(4),
+            others: signers.slice(4)
         },
         generateRandomGene,
         data: {},
