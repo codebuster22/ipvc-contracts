@@ -19,7 +19,10 @@ contract Controller is SignatureHelper {
     address public warriorsContract;            // address ERC721 Warriors contract
     address public warriorGeneGeneratorContract;// address of WarriorGeneGenerator contract
 
-    uint8 public isInitialized;                 // status of Controller contract, 1 - initialized, 0 - not initialized
+    bool public isInitialized;                 // status of Controller contract, 1 - initialized, 0 - not initialized
+    bytes32 public constant SALT = keccak256("generateWarrior(uint256, address)");
+
+    mapping (bytes32 => bool) public isMetadataUsed;
 
     modifier onlyAdmin {
         require(
@@ -31,7 +34,7 @@ contract Controller is SignatureHelper {
 
     modifier onlyOrigin(
         address _from,
-        bytes memory _metadata,
+        bytes32 _metadata,
         bytes memory _signature
     ) {
         bytes32 messageHash = generateHash(address(this), _from, _metadata);
@@ -53,6 +56,10 @@ contract Controller is SignatureHelper {
         address _warriorGeneGeneratorContract
     ) public onlyAdmin() {
         require(
+            !isInitialized,
+            "Controller: already initialized"
+        );
+        require(
             _origin != address(0) &&
             _warriorsContract != address(0) &&
             _warriorGeneGeneratorContract != address(0),
@@ -61,10 +68,56 @@ contract Controller is SignatureHelper {
         origin = _origin;
         warriorsContract = _warriorsContract;
         warriorGeneGeneratorContract = _warriorGeneGeneratorContract;
-        isInitialized = 1;
+        isInitialized = true;
     }
 
-    function updateOrigin(address _newOrigin) external onlyAdmin{
+    function generateWarrior(
+        address _owner,
+        bytes32 _metadata,
+        bytes memory _originSignature
+    ) public onlyOrigin(_owner, _metadata, _originSignature) {
+        require(
+            isMetadataUsed[_metadata],
+            "Controller: metadata already used"
+        );
+        require(
+            Warriors(warriorsContract).isPopulating(),
+            "Controller: wait for next generation warriors"
+        );
+        uint256 currentGen = Warriors(warriorsContract).currentGeneration();
+        bytes32 metadata = _metadata;
+        for(uint256 rounds; rounds<2; rounds++) {
+            uint256 gene = WarriorGeneGenerator(warriorGeneGeneratorContract).geneGenerator(currentGen, metadata);
+            if(!Warriors(warriorsContract).isGeneUsed(gene)){
+                Warriors(warriorsContract).generateWarrior(gene, _owner);
+                return;
+            }
+            metadata = keccak256(abi.encodePacked(SALT, metadata));
+        }
+    }
+
+    function generateHash(
+        address _to,
+        address _from,
+        bytes32 _metadata
+    ) public pure returns(bytes32) {
+        return keccak256(
+            abi.encodePacked(
+                _to,_from, _metadata, "generateWarrior(address, bytes32, bytes memory)"
+            )
+        );
+    }
+
+    function setNewController(address _newController) external onlyAdmin{
+        require(
+            _newController != address(0),
+            "Controller: new controller cannot be zero"
+        );
+        WarriorGeneGenerator(warriorGeneGeneratorContract).setController(_newController);
+        Warriors(warriorsContract).setController(_newController);
+    }
+
+    function setOrigin(address _newOrigin) external onlyAdmin{
         require(
             _newOrigin != address(0),
             "Controller: origin cannot be zero address"
@@ -72,28 +125,11 @@ contract Controller is SignatureHelper {
         origin = _newOrigin;
     }
 
-    function updateGeneGenerator(address _newGeneGenerator) external onlyAdmin{
+    function setGeneGenerator(address _newGeneGenerator) external onlyAdmin{
         require(
             _newGeneGenerator != address(0),
             "Controller: gene generator cannot be zero address"
         );
         warriorGeneGeneratorContract = _newGeneGenerator;
-    }
-
-    function generateWarrior(
-        address _owner,
-        uint256 _gene,
-        bytes memory _metadata,
-        bytes memory _originSignature
-    ) public onlyOrigin(_owner, _metadata, _originSignature) {
-        Warriors(warriorsContract).generateWarrior(_gene, _owner);
-    }
-
-    function generateHash(
-        address _to,
-        address _from,
-        bytes memory _metadata
-    ) public pure returns(bytes32) {
-        return keccak256(abi.encodePacked(_to,_from, _metadata, "generateWarrior()"));
     }
 }
