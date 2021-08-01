@@ -16,6 +16,10 @@ contract WarriorCore is OriginControl, WarriorGeneration {
     bool public isInitialized;                 // status of Controller contract, 1 - initialized, 0 - not initialized
     bytes32 public constant SALT = keccak256("generateWarrior(uint256, address)");
 
+    constructor (
+        uint256 _initialMaxPopulation
+    ) WarriorGeneration(_initialMaxPopulation) { }
+
     mapping (bytes32 => bool) public isMetadataUsed;
 
     function initialize(
@@ -40,16 +44,25 @@ contract WarriorCore is OriginControl, WarriorGeneration {
         address _owner,
         bytes32 _metadata,
         bytes memory _originSignature
-    ) public onlyOrigin(_owner, _metadata, _originSignature) {
+    ) public populationCheck onlyOrigin(_owner, _metadata, _originSignature) {
+        require(
+            _metadata != bytes32(0),
+            "Warriors: cannot mint warrior without attributes"
+        );
+        require(
+            _owner != address(0),
+            "Warriors: no warrior can be assigned to zero address"
+        );
         require(
             !isMetadataUsed[_metadata],
-            "Controller: metadata already used"
+            "WarriorCore: metadata already used"
         );
         require(
             isActive(),
             "Controller: wait for next generation warriors to arrive"
         );
         bytes32 metadata = _metadata;
+        isMetadataUsed[_metadata] = true;
         for(uint256 rounds; rounds<2; rounds++) {
             uint256 gene = IGeneGenerator(warriorGeneGeneratorContract).generateGene(currentGeneration, metadata);
             if(!isGeneUsed[gene]){
@@ -58,7 +71,7 @@ contract WarriorCore is OriginControl, WarriorGeneration {
             }
             metadata = keccak256(abi.encodePacked(SALT, metadata));
         }
-        revert("Warriors: cannot be minted using this data");
+        revert("Warriors: gene already used");
     }
 
     function setGeneGenerator(address _newGeneGenerator) external onlyAdmin{
