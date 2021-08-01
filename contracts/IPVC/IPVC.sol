@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-import "../VaccineToken.sol";
+import "./VaccineToken.sol";
 
 contract IPVC {
 
