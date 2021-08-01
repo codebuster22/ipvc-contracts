@@ -51,7 +51,7 @@ contract WarriorCore is OriginControl, WarriorGeneration {
         );
         bytes32 metadata = _metadata;
         for(uint256 rounds; rounds<2; rounds++) {
-            uint256 gene = IGeneGenerator(warriorGeneGeneratorContract).geneGenerator(currentGeneration, metadata);
+            uint256 gene = IGeneGenerator(warriorGeneGeneratorContract).generateGene(currentGeneration, metadata);
             if(!isGeneUsed[gene]){
                 _generateWarrior(gene, _owner);
                 return;
