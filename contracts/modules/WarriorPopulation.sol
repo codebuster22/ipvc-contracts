@@ -15,11 +15,15 @@ contract WarriorPopulation is Warriors{
     // theoretically 100 thousand warriors can be minted per generation;
     uint256 public maxPopulationPerGen = 100000;
     // maximum population for current generation, calculated using logistics equation
-    uint256 public currentGenerationMaxPopulation = 14020;
+    uint256 public currentGenerationMaxPopulation;
     // total warrior minted - total warrior minted for this current generation
     uint256 public populationUntilLastGeneration;
     // population growth rate
     uint256 public growthRate = 391;
+
+    constructor (uint256 _initialMaxPopulation) Warriors() {
+       currentGenerationMaxPopulation = _initialMaxPopulation;
+    }
 
     /**
      * @dev calculate next generation population
