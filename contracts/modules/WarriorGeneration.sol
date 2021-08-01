@@ -7,7 +7,7 @@ import "./WarriorPopulation.sol";
 contract WarriorGeneration is WarriorPopulation{
 
     // cooldown period before next generation warrior can be minted after the last warrior was minted.
-    uint256 public constant GENERATION_COOLDOWN = 22270;
+    uint256 public constant GENERATION_COOLDOWN = 272200;
     // current generation id
     uint256 public currentGeneration;
     // block number after which warriors for current generation can only be minted
