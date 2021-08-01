@@ -1,7 +1,9 @@
 /* eslint-disable no-undef */
-const { expect } = require("chai");
+const { expect, use } = require("chai");
 const { constants, time, BN } = require("@openzeppelin/test-helpers");
+const {solidity} = require('ethereum-waffle');
 const init = require("./helpers/init");
+use(solidity);
 
 const deploy = async () => {
     const setup = await init.setup();
