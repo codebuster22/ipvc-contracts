@@ -28,18 +28,6 @@ contract Warriors is ERC721 {
       * @param _owner address of owner who requested to generate warrior
       */
     function _generateWarrior(uint256 _gene, address _owner) internal {
-        require(
-            _gene != 0,
-            "Warriors: no warrior without gene"
-        );
-        require(
-            _owner != address(0),
-            "Warriors: no warrior can be assigned to zero address"
-        );
-        require(
-            isGeneUsed[_gene] == false,
-            "Warriors: gene already used"
-        );
         uint256 tokenId = warriorCounter;
         warriorCounter++;
         warriors[tokenId] = _gene;
@@ -53,7 +41,7 @@ contract Warriors is ERC721 {
      * @dev get warrior's gene
      * @param _warriorId id of warrior token
      */
-    function getWarrior(uint256 _warriorId) external view returns(uint256 warrior) {
+    function getWarrior(uint256 _warriorId) public view returns(uint256 warrior) {
         warrior = warriors[_warriorId];
         require(
             warrior != 0,
