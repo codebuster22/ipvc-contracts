@@ -1,4 +1,5 @@
 // eslint-disable
+/* eslint-disable no-undef */
 require("dotenv").config({ path: "./.env" });
 require("solidity-coverage");
 require("@nomiclabs/hardhat-web3");

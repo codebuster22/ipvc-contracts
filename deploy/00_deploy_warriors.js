@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const addressesPath = "../addresses.json";
 const DeployedContracts = require(addressesPath);
 const fs = require('fs');
