@@ -14,9 +14,7 @@ const setup = async () => {
     };
 };
 
-const Warriors = async (setup) => await ethers.getContractFactory("Warriors", setup.roles.root);
-
-const Controller = async (setup) => await ethers.getContractFactory("Controller", setup.roles.root);
+const Warriors = async (setup) => await ethers.getContractFactory("WarriorCore", setup.roles.root);
 
 const GeneGenerator = async (setup) => await ethers.getContractFactory("WarriorGeneGenerator", setup.roles.root);
 
@@ -32,4 +30,4 @@ const generateRandomGene = () => {
     return `${country}${layer1}${layer2}${layer3}${layer4}${layer5}`;
 };
 
-module.exports = { setup, Warriors, Controller, GeneGenerator };
+module.exports = { setup, Warriors, GeneGenerator };
