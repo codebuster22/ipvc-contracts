@@ -17,7 +17,7 @@ contract WarriorGeneration is WarriorPopulation{
     // each generation will have random and unique population, thanks to chaos
     uint256 public constant lastGeneration = 466;
 
-    constructor() {
+    constructor(uint256 _initialMaxPopulation) WarriorPopulation(_initialMaxPopulation) {
         nextGenerationStartBlock = block.number + 500;
     }
 
@@ -41,7 +41,7 @@ contract WarriorGeneration is WarriorPopulation{
     }
 
     function getWarriorGeneration(uint256 _warriorId) public view returns(uint256) {
-        return (warriors[_warriorId]/10**72)%1000;
+        return (getWarrior(_warriorId)/10**72)%1000;
     }
 
     /**
