@@ -1,6 +1,8 @@
 /* eslint-disable no-undef */
-const { expect } = require("chai");
+const { expect, use } = require("chai");
 const { constants } = require("@openzeppelin/test-helpers");
+const {solidity} = require('ethereum-waffle');
+use(solidity);
 
 const init = require("./helpers/init");
 

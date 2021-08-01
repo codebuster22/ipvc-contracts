@@ -7,3 +7,4 @@ artifacts/openzeppelin-solidity/
 **.dbg.json
 coverage/
 coverage.json
+.env
