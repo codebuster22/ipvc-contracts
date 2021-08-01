@@ -6,7 +6,11 @@
   "scripts": {
     "lint": "eslint . --ext .js && npx solhint -f table 'contracts/**/*.sol'",
     "test": "npx hardhat test",
-    "coverage": "npx hardhat coverage"
+    "coverage": "npx hardhat coverage",
+    "deploy:contracts:rinkeby": "npx hardhat --network rinkeby deploy",
+    "deploy:contracts:mainnet": "npx hardhat --network mainnet deploy",
+    "deploy:contracts:mumbai": "npx hardhat --network mumbai deploy",
+    "deploy:contracts:matic": "npx hardhat --network matic deploy"
   },
   "dependencies": {
     "dotenv": "^10.0.0",
