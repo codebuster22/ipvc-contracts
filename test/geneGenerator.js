@@ -9,8 +9,6 @@ const deploy = async () => {
 
     setup.Warriors = await init.Warriors(setup);
 
-    setup.Controller = await init.Controller(setup);
-
     setup.GeneGenerator = await init.GeneGenerator(setup);
 
     return setup;
@@ -24,38 +22,35 @@ describe("Contract: WarriorGeneGenerator", async () => {
         });
         it("deploys gene generator", async () => {
             setup.geneGenerator = await setup.GeneGenerator.deploy(setup.roles.root.address);
-            expect(await setup.geneGenerator.controller()).to.equal(setup.roles.root.address);
+            expect(await setup.geneGenerator.core()).to.equal(setup.roles.root.address);
         });
     });
     context(">> generate genes", async () => {
         it("generates gene with 5 attributes", async () => {
             const metadata = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(Math.random().toString()));
-            console.log((await setup.geneGenerator.geneGenerator(0,metadata)).toString());
-            expect((await setup.geneGenerator.geneGenerator(1,metadata)).toString().length).to.equal(76);
+            expect((await setup.geneGenerator.generateGene(1, metadata)).toString().length).to.equal(76);
+        });
+        context("msg.sender is not core address", async ()=> {
+            it("reverts", async () => {
+                const metadata = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(Math.random().toString()));
+                await expect(
+                    setup.geneGenerator.connect(setup.roles.beneficiary1).generateGene(1, metadata)
+                ).to.be.revertedWith("WarriorGeneGenerator: only core functionality");
+            });
         });
     });
-    context(">> controller functionality", async () => {
-        context("setAttributes", async()=> {
-            it("updates attributes when valid input given", async ()=>{
-                await setup.geneGenerator.connect(setup.roles.root).setTotalGeneAttributes(6);
-                expect((await setup.geneGenerator.totalGeneAttributes()).toString()).to.equal("6");
-                expect((await setup.geneGenerator.geneModulus()).toString()).to.equal((10**12).toString());
-            });
-            context("attributes less than current", async () => {
-                it("reverts", async () => {
-                    await expect(setup.geneGenerator.setTotalGeneAttributes(4)).to.be.revertedWith("WarriorGeneGenerator: cannot decrease gene attributes");
-                });
+    context("setCore", async () => {
+        context("new core address is zero address", async () => {
+            it("reverts", async () => {
+                await expect(
+                    setup.geneGenerator.connect(setup.roles.root).setCore(constants.ZERO_ADDRESS)
+                ).to.be.revertedWith("WarriorGeneGenerator: new core cannot be zero");
             });
         });
-        context("setController", async () => {
-            it("updates wwith valid new controller address", async () => {
-                await setup.geneGenerator.connect(setup.roles.root).setController(setup.roles.beneficiary1.address);
-                expect(await setup.geneGenerator.controller()).to.equal(setup.roles.beneficiary1.address);
-            });
-            context("new controller address is zero address", async () => {
-                it("reverts", async () => {
-                    await expect(setup.geneGenerator.connect(setup.roles.beneficiary1).setController(constants.ZERO_ADDRESS)).to.be.revertedWith("WarriorGeneGenerator: new controller cannot be zero");
-                });
+        context("valid new core address", async () => {
+            it("updates wwith valid new core address", async () => {
+                await setup.geneGenerator.connect(setup.roles.root).setCore(setup.roles.beneficiary1.address);
+                expect(await setup.geneGenerator.core()).to.equal(setup.roles.beneficiary1.address);
             });
         });
     });
