@@ -6,9 +6,15 @@
     },
     "rinkeby": {
         "origin": "0x7589116F8dA3ef3934b6A7b6D398c46348d0A718",
-        "WarriorCore": "0x508B88FA6C90981c075B752cA5695ae33c72d1Ef",
-        "warriorGeneGeneratorAddress": "0xfA87fbF5C352d40Fb3F217900E8825a42eC704FB"
+        "WarriorCore": "0x8398b457214Aefbb70f217Bb6572CB38aBe58F2a",
+        "warriorGeneGeneratorAddress": "0x8dA9fa26E83d47B497dfE30cA602594FF72642f2"
     },
     "mainnet": { "origin": "0x7589116F8dA3ef3934b6A7b6D398c46348d0A718" },
     "localhost": { "origin": "0x7589116F8dA3ef3934b6A7b6D398c46348d0A718" }
+    "mumbai": {
+        "origin": "0x7589116F8dA3ef3934b6A7b6D398c46348d0A718"
+    },
+    "matic": {
+        "origin": "0x7589116F8dA3ef3934b6A7b6D398c46348d0A718"
+    }
 }
