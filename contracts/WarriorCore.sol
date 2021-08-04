@@ -5,9 +5,10 @@ pragma solidity ^0.8.6;
 import "./interface/IGeneGenerator.sol";
 import "./access/OriginControl.sol";
 import "./modules/WarriorGeneration.sol";
+import "./modules/WarriorAssetRegistry.sol";
 
 
-contract WarriorCore is OriginControl, WarriorGeneration {
+contract WarriorCore is OriginControl, WarriorGeneration, WarriorAssetRegistry {
 
     string public constant version = "0.1.0-beta";
 
@@ -80,5 +81,9 @@ contract WarriorCore is OriginControl, WarriorGeneration {
             "Controller: gene generator cannot be zero address"
         );
         warriorGeneGeneratorContract = _newGeneGenerator;
+    }
+
+    function registerAsset(uint256 layerId, bytes32[] memory assetCids, uint256 generation) public override onlyAdmin {
+        super.registerAsset(layerId, assetCids, generation);
     }
 }
