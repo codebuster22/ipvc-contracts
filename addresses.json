@@ -1,1 +1,14 @@
-{"hardhat":{"origin":"0x7589116F8dA3ef3934b6A7b6D398c46348d0A718","WarriorCore":"0xf77952921F542B743832823F1d8268e118d1FD97","warriorGeneGeneratorAddress":"0x4Dfe0A3EA94a590CD7303BF97AbaAE55DB280314"},"rinkeby":{"origin":"0x7589116F8dA3ef3934b6A7b6D398c46348d0A718","WarriorCore":"0x508B88FA6C90981c075B752cA5695ae33c72d1Ef","warriorGeneGeneratorAddress":"0xfA87fbF5C352d40Fb3F217900E8825a42eC704FB"},"mainnet":{"origin":"0x7589116F8dA3ef3934b6A7b6D398c46348d0A718"},"localhost":{"origin":"0x7589116F8dA3ef3934b6A7b6D398c46348d0A718"}}
+{
+    "hardhat": {
+        "origin": "0x7589116F8dA3ef3934b6A7b6D398c46348d0A718",
+        "WarriorCore": "0xf77952921F542B743832823F1d8268e118d1FD97",
+        "warriorGeneGeneratorAddress": "0x4Dfe0A3EA94a590CD7303BF97AbaAE55DB280314"
+    },
+    "rinkeby": {
+        "origin": "0x7589116F8dA3ef3934b6A7b6D398c46348d0A718",
+        "WarriorCore": "0x508B88FA6C90981c075B752cA5695ae33c72d1Ef",
+        "warriorGeneGeneratorAddress": "0xfA87fbF5C352d40Fb3F217900E8825a42eC704FB"
+    },
+    "mainnet": { "origin": "0x7589116F8dA3ef3934b6A7b6D398c46348d0A718" },
+    "localhost": { "origin": "0x7589116F8dA3ef3934b6A7b6D398c46348d0A718" }
+}
