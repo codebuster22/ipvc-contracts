@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 const { expect, use } = require("chai");
 const { constants, time, BN } = require("@openzeppelin/test-helpers");
+const { getBytes32FromHash, getHashFromBytes32 } = require('./helpers/herlpers');
 const {solidity} = require('ethereum-waffle');
 const init = require("./helpers/init");
 use(solidity);
@@ -27,6 +28,8 @@ const logisticsCalculation = (startingPop, growthRate) => {
 describe("Contract: WarriorCore", async () => {
     let setup;
     let metadata;
+    let startBlockNumer = await ethers.provider.getBlockNumber();
+    let hashes = [];
     let invalid_warrior = 100;
     let initialMaxPopulation = 14020;
     let initialMaxPopulationTest = 2;
@@ -236,6 +239,61 @@ describe("Contract: WarriorCore", async () => {
             it("updates when called by admin", async () => {
                 await setup.warriors.connect(setup.roles.root).setGeneGenerator(setup.data.geneGenerator.address);
                 expect(await setup.warriors.warriorGeneGeneratorContract()).to.equal(setup.data.geneGenerator.address);
+            });
+        });
+        context("registerAssets", async () => {
+            before("!! generate hash", async () => {
+                const hash = getBytes32FromHash("QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz");
+                for(let i = 0; i < 20; i++){
+                    hashes.push(hash);
+                }
+                expect(hashes.length).to.equal(20);
+            });
+            context("caller is not admin", async () => {
+                it("reverts asset", async () => {
+                    await expect(
+                        setup.warriors.connect(setup.roles.beneficiary1).registerAsset(1, hashes, 0)
+                    ).to.be.revertedWith("Controller: only admin functionality");
+                });
+            });
+            context("caller is admin", async () => {
+                it("registers asset", async () => {
+                    let totalGasCost = new BN(0);
+                    let j = 0;
+                    for(j; j < 2; j++){
+                        for(let i = 0; i<4; i++){
+                            const estimate = (await setup.warriors.estimateGas.registerAsset(i, hashes, j).toString());
+                            totalGasCost = totalGasCost.add(new BN(estimate));
+                            await expect(
+                                setup.warriors.connect(setup.roles.root).registerAsset(i, hashes, j)
+                            ).to.emit(setup.warriors, "AssetForLayerRegistered");
+                        }
+                    }
+                    console.log("Gas for ",hashes.length," ",totalGasCost.toString());
+                });
+            });
+        });
+    });
+    context("reading asset data", async () => {
+        let filter;
+        before("!! set filers for events", async ( ) => {
+            filter = setup.warriors.filters.AssetRegistered();
+        });
+        it("filters assets", async () => {
+            let assets = {};
+            setup.warriors.queryFilter(filter, startBlockNumer).then(
+                events => {
+                    events.forEach(
+                        event => assets[event.args[0].toString()] = getHashFromBytes32(event.args[1])
+                    );
+                }
+            ).then(() => {
+                const gen0s = Object.keys(assets).filter(
+                    assetId => assetId.length <= 4
+                );
+                const gen1s = Object.keys(assets).filter(
+                    assetId => assetId.length >= 5 && parseInt(assetId.slice(0,assetId.length-4)) == 1
+                );
             });
         });
     });
