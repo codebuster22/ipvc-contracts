@@ -7,21 +7,25 @@ import "./WarriorPopulation.sol";
 contract WarriorGeneration is WarriorPopulation{
 
     // cooldown period before next generation warrior can be minted after the last warrior was minted.
-    uint256 public constant GENERATION_COOLDOWN = 272200;
+    uint256 public immutable GENERATION_COOLDOWN;
     // current generation id
     uint256 public currentGeneration;
     // block number after which warriors for current generation can only be minted
     uint256 public nextGenerationStartBlock;
-    // with the starting contions, it will take 466 generations to reach 27 million warriors
-    // last generation 466 is going to have 2189 warriors only
+    // with the starting contions, it will take might 466 generations to reach 27 million warriors
     // each generation will have random and unique population, thanks to chaos
-    uint256 public constant lastGeneration = 466;
 
-    constructor(uint256 _initialMaxPopulation) WarriorPopulation(_initialMaxPopulation) {
+    constructor(uint256 _initialMaxPopulation, uint256 _maxPopulation, uint256 _cooldown) WarriorPopulation(_initialMaxPopulation, _maxPopulation) {
         nextGenerationStartBlock = block.number + 500;
+        GENERATION_COOLDOWN = _cooldown;
+
     }
 
     modifier populationCheck{
+        require(
+            isMaxReached(),
+            "Warriors: no more warrior can be minted"
+        );
         require(
             currentGenerationPopulation() < currentGenerationMaxPopulation,
             "Warriors: no more warrior can be minted for this generation"
@@ -33,7 +37,7 @@ contract WarriorGeneration is WarriorPopulation{
       * @dev is warrior generation active
       */
     function isActive() public view returns(bool){
-        return nextGenerationStartBlock <= block.number;
+        return (nextGenerationStartBlock <= block.number) && isMaxReached();
     }
 
     function currentGenerationPopulation() public view returns(uint256) {
@@ -58,8 +62,18 @@ contract WarriorGeneration is WarriorPopulation{
      */
     function _endCurrentGeneration() internal{
         nextGenerationStartBlock = block.number + GENERATION_COOLDOWN;
-        currentGenerationMaxPopulation = _calculateNextGenPopulation();
         populationUntilLastGeneration = warriorCounter;
+        currentGenerationMaxPopulation = _getNextGenerationPopulation();
         currentGeneration++;
+    }
+
+    /**
+      * @dev calculate next generation population
+      */
+    function _getNextGenerationPopulation() internal view returns(uint256 nexGenPopulation)  {
+        nexGenPopulation = _calculateNextGenPopulation();
+        if(populationUntilLastGeneration + nexGenPopulation > maxPopulation){
+            nexGenPopulation = maxPopulation - populationUntilLastGeneration;
+        }
     }
 }

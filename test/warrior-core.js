@@ -33,10 +33,14 @@ describe("Contract: WarriorCore", async () => {
     let invalid_warrior = 100;
     let initialMaxPopulation = 14020;
     let initialMaxPopulationTest = 2;
+    let maxPopulation = 27000000;
+    let maxPopulationTest = 3;
+    let coolDown = 272200;
+    let coolDownTest = 200;
     context("Deploy & Initialize Contract", async () => {
         before("!! setup and deploy controller", async () => {
             setup = await deploy();
-            setup.warriors = await setup.Warriors.deploy(initialMaxPopulation);
+            setup.warriors = await setup.Warriors.deploy(initialMaxPopulation, maxPopulation, coolDown);
             setup.geneGenerator = await setup.GeneGenerator.deploy(setup.warriors.address);
         });
         context("Invalid parameters", async () => {
@@ -101,7 +105,7 @@ describe("Contract: WarriorCore", async () => {
                 });
             });
             context("valid origin signature but before time", async () => {
-                it("success", async () => {
+                it("reverts", async () => {
                     const to = setup.warriors.address;
                     const from = setup.roles.beneficiary1.address;
                     const messageHash = await setup.warriors.generateHash(to, from, metadata);
@@ -302,7 +306,7 @@ describe("Contract: WarriorCore", async () => {
         let growthRate = 3.91;
         before("!! deploy and set initial conditions", async () => {
             setup = await deploy();
-            setup.warriors = await setup.Warriors.deploy(initialMaxPopulationTest);
+            setup.warriors = await setup.Warriors.deploy(initialMaxPopulationTest, maxPopulation, coolDown);
             setup.geneGenerator = await setup.GeneGenerator.deploy(setup.warriors.address);
             await time.advanceBlockTo((await time.latestBlock()).add(new BN(500)));
             await setup.warriors
@@ -355,6 +359,92 @@ describe("Contract: WarriorCore", async () => {
                         .connect(setup.roles.beneficiary1)
                         .currentGenerationMaxPopulation()).toString()
                 ).to.equal(nextGenPop.toString());
+            });
+        });
+    });
+    context("starting with last generation", async () => {
+        let messageHash;
+        let signature;
+        before("!! setup and initialize", async () => {
+            setup = await deploy();
+            setup = await deploy();
+            setup.warriors = await setup.Warriors.deploy(initialMaxPopulationTest, maxPopulationTest, coolDownTest);
+            setup.geneGenerator = await setup.GeneGenerator.deploy(setup.warriors.address);
+            await time.advanceBlockTo((await time.latestBlock()).add(new BN(500)));
+            await setup.warriors
+                .connect(setup.roles.root)
+                .initialize(setup.roles.origin.address, setup.geneGenerator.address);
+            const to = setup.warriors.address;
+            const from = setup.roles.beneficiary1.address;
+            messageHash = await setup.warriors.generateHash(to, from, metadata);
+            signature = await setup.roles.origin.signMessage(ethers.utils.arrayify(messageHash));
+            await expect(
+                setup.warriors
+                    .connect(setup.roles.beneficiary1)
+                    .generateWarrior(setup.roles.beneficiary1.address, metadata, signature)
+            ).to.emit(setup.warriors, "WarriorGenerated");
+            metadata = generateMetadata();
+            messageHash = await setup.warriors.generateHash(to, from, metadata);
+            signature = await setup.roles.origin.signMessage(ethers.utils.arrayify(messageHash));
+            await expect(
+                setup.warriors
+                    .connect(setup.roles.beneficiary1)
+                    .generateWarrior(setup.roles.beneficiary1.address, metadata, signature)
+            ).to.emit(setup.warriors, "WarriorGenerated");
+        });
+        context("check new paramters for next generation", async () => {
+            it("sets correct values for next population", async () => {
+                expect(
+                    await setup.warriors.currentGenerationMaxPopulation()
+                ).to.equal("1");
+            });
+        });
+        context("trying to mint warrior before start block number", async () => {
+            it("reverts", async () => {
+                const to = setup.warriors.address;
+                const from = setup.roles.beneficiary1.address;
+                metadata = generateMetadata();
+                messageHash = await setup.warriors.generateHash(to, from, metadata);
+                signature = await setup.roles.origin.signMessage(ethers.utils.arrayify(messageHash));
+                await expect(
+                    setup.warriors
+                        .connect(setup.roles.beneficiary1)
+                        .generateWarrior(setup.roles.beneficiary1.address, metadata, signature)
+                ).to.revertedWith("Controller: wait for next generation warriors to arrive");
+            });
+        });
+        context("mint last generation warrior", async () => {
+            it("mints very last warrior", async () => {
+                await time.advanceBlockTo((await time.latestBlock()).add(new BN(200)));
+                const from = setup.roles.beneficiary1.address;
+                await expect(
+                    setup.warriors
+                        .connect(setup.roles.beneficiary1)
+                        .generateWarrior(from, metadata, signature)
+                ).to.emit(setup.warriors, "WarriorGenerated");
+            });
+        });
+        context("after minting last warrior for whole warriors timeline", async () => {
+            it("cannot mint any new warrior", async () => {
+                const to = setup.warriors.address;
+                const from = setup.roles.beneficiary1.address;
+                metadata = generateMetadata();
+                messageHash = await setup.warriors.generateHash(to, from, metadata);
+                signature = await setup.roles.origin.signMessage(ethers.utils.arrayify(messageHash));
+                await expect(
+                    setup.warriors
+                        .connect(setup.roles.beneficiary1)
+                        .generateWarrior(setup.roles.beneficiary1.address, metadata, signature)
+                ).to.revertedWith("Warriors: no more warrior can be minted");
+            });
+            it("sets correct state for warriors", async () => {
+                const prevPopulation = await setup.warriors.populationUntilLastGeneration();
+                expect(prevPopulation.toString()).to.equal(maxPopulationTest.toString());
+                expect(await setup.warriors.isActive()).to.equal(false);
+            });
+            it("not active even after cooldown period", async () => {
+                await time.advanceBlockTo((await time.latestBlock()).add(new BN(200)));
+                expect(await setup.warriors.isActive()).to.equal(false);
             });
         });
     });
