@@ -67,6 +67,17 @@ module.exports = {
             url: `https://rinkeby.infura.io/v3/${INFURA_KEY}`,
             saveDeployments: true,
         },
+        matic: {
+            ...sharedNetworkConfig,
+            url: `https://polygon-mainnet.infura.io/v3/${INFURA_KEY}`,
+            saveDeployments: true
+        },
+        mumbai: {
+            ...sharedNetworkConfig,
+            url: `https://rpc-mumbai.matic.today`,
+            chainId: 80001,
+            saveDeployments: true
+        }
     },
     solidity: {
         compilers: [
