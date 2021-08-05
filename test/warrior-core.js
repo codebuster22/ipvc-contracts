@@ -288,10 +288,10 @@ describe("Contract: WarriorCore", async () => {
                     );
                 }
             ).then(() => {
-                const gen0s = Object.keys(assets).filter(
+                Object.keys(assets).filter(
                     assetId => assetId.length <= 4
                 );
-                const gen1s = Object.keys(assets).filter(
+                Object.keys(assets).filter(
                     assetId => assetId.length >= 5 && parseInt(assetId.slice(0,assetId.length-4)) == 1
                 );
             });
