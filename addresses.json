@@ -10,7 +10,7 @@
         "warriorGeneGeneratorAddress": "0x8dA9fa26E83d47B497dfE30cA602594FF72642f2"
     },
     "mainnet": { "origin": "0x7589116F8dA3ef3934b6A7b6D398c46348d0A718" },
-    "localhost": { "origin": "0x7589116F8dA3ef3934b6A7b6D398c46348d0A718" },
+    "localhost": { "origin": "0x7589116F8dA3ef3934b6A7b6D398c46348d0A718" }
     "mumbai": {
         "origin": "0x7589116F8dA3ef3934b6A7b6D398c46348d0A718"
     },
