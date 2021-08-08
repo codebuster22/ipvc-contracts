@@ -19,19 +19,28 @@ contract WarriorPopulation is Warriors{
     // total warrior minted - total warrior minted for this current generation
     uint256 public populationUntilLastGeneration;
     // population growth rate
-    uint256 public growthRate = 391;
+    uint256 public growthRate = 391;   // 3.91
 
-    constructor (uint256 _initialMaxPopulation) Warriors() {
+    constructor (uint256 _initialMaxPopulation, uint256 _maxPopulation) Warriors() {
        currentGenerationMaxPopulation = _initialMaxPopulation;
+       maxPopulation = _maxPopulation;
+    }
+
+    function isMaxReached() internal view returns(bool) {
+       return populationUntilLastGeneration < maxPopulation;
     }
 
     /**
      * @dev calculate next generation population
      */
-     function _calculateNextGenPopulation() internal view returns(uint256 nextGenPopulation){
-        uint256 currentPopPercent = (currentGenerationMaxPopulation * PRECISION) / maxPopulationPerGen;
-        uint256 totalPrecision = PRECISION * GROWTH_PRECISION;
-        uint256 nextPopPercent = ( growthRate * currentPopPercent * (10**18 - currentPopPercent) ) / totalPrecision;
-        nextGenPopulation = (nextPopPercent * maxPopulationPerGen) / PRECISION;
-     }
+   function _calculateNextGenPopulation() internal view returns(uint256 nextGenPopulation){
+      uint256 currentPopPercent = (currentGenerationMaxPopulation * PRECISION) / maxPopulationPerGen;
+      uint256 totalPrecision = PRECISION * GROWTH_PRECISION;
+      uint256 nextPopPercent = ( growthRate * currentPopPercent * (10**18 - currentPopPercent) ) / totalPrecision;
+      nextGenPopulation = (nextPopPercent * maxPopulationPerGen) / PRECISION;
+   }
+
+   function totalSupply() external view returns(uint256){
+      return maxPopulation;
+   }
 }

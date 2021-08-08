@@ -16,11 +16,13 @@ contract WarriorCore is OriginControl, WarriorGeneration {
     bool public isInitialized;                 // status of Controller contract, 1 - initialized, 0 - not initialized
     bytes32 public constant SALT = keccak256("generateWarrior(uint256, address)");
 
-    constructor (
-        uint256 _initialMaxPopulation
-    ) WarriorGeneration(_initialMaxPopulation) { }
-
     mapping (bytes32 => bool) public isMetadataUsed;
+
+    constructor (
+        uint256 _initialMaxPopulation,
+        uint256 _maxPopulation,
+        uint256 _cooldown
+    ) WarriorGeneration(_initialMaxPopulation, _maxPopulation, _cooldown) { }
 
     function initialize(
         address _origin,
