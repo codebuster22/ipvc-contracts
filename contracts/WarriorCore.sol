@@ -5,10 +5,9 @@ pragma solidity ^0.8.6;
 import "./interface/IGeneGenerator.sol";
 import "./access/OriginControl.sol";
 import "./modules/WarriorGeneration.sol";
-import "./modules/WarriorAssetRegistry.sol";
 
 
-contract WarriorCore is OriginControl, WarriorGeneration, WarriorAssetRegistry {
+contract WarriorCore is OriginControl, WarriorGeneration {
 
     string public constant version = "0.1.0-beta";
 
@@ -29,12 +28,12 @@ contract WarriorCore is OriginControl, WarriorGeneration, WarriorAssetRegistry {
     ) public onlyAdmin() {
         require(
             !isInitialized,
-            "Controller: already initialized"
+            "WarriorCore: already initialized"
         );
         require(
             _origin != address(0) &&
             _warriorGeneGeneratorContract != address(0),
-            "Controller: zero address not allowed"
+            "WarriorCore: zero address not allowed"
         );
         origin = _origin;
         warriorGeneGeneratorContract = _warriorGeneGeneratorContract;
@@ -48,11 +47,11 @@ contract WarriorCore is OriginControl, WarriorGeneration, WarriorAssetRegistry {
     ) public populationCheck onlyOrigin(_owner, _metadata, _originSignature) {
         require(
             _metadata != bytes32(0),
-            "Warriors: cannot mint warrior without attributes"
+            "WarriorCore: cannot mint warrior without attributes"
         );
         require(
             _owner != address(0),
-            "Warriors: no warrior can be assigned to zero address"
+            "WarriorCore: no warrior can be assigned to zero address"
         );
         require(
             !isMetadataUsed[_metadata],
@@ -60,7 +59,11 @@ contract WarriorCore is OriginControl, WarriorGeneration, WarriorAssetRegistry {
         );
         require(
             isActive(),
-            "Controller: wait for next generation warriors to arrive"
+            "WarriorCore: wait for next generation warriors to arrive"
+        );
+        require(
+            _areAssetsRegistered,
+            "WarriorCore: assets not yet registered"
         );
         bytes32 metadata = _metadata;
         isMetadataUsed[_metadata] = true;
@@ -72,18 +75,18 @@ contract WarriorCore is OriginControl, WarriorGeneration, WarriorAssetRegistry {
             }
             metadata = keccak256(abi.encodePacked(SALT, metadata));
         }
-        revert("Warriors: gene already used");
+        revert("WarriorCore: gene already used");
     }
 
     function setGeneGenerator(address _newGeneGenerator) external onlyAdmin{
         require(
             _newGeneGenerator != address(0),
-            "Controller: gene generator cannot be zero address"
+            "WarriorCore: gene generator cannot be zero address"
         );
         warriorGeneGeneratorContract = _newGeneGenerator;
     }
 
-    function registerAsset(uint256 layerId, bytes32[] memory assetCids, uint256 generation) public override onlyAdmin {
-        super.registerAsset(layerId, assetCids, generation);
+    function registerAssets(uint256 _totalLayers, bytes32 _assetsCid) public onlyAdmin {
+        _registerAssets(currentGeneration, _totalLayers, _assetsCid);
     }
 }
