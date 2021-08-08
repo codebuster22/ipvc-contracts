@@ -3,8 +3,9 @@
 pragma solidity ^0.8.6;
 
 import "./WarriorPopulation.sol";
+import "./WarriorAssetRegistry.sol";
 
-contract WarriorGeneration is WarriorPopulation{
+contract WarriorGeneration is WarriorPopulation, WarriorAssetRegistry{
 
     // cooldown period before next generation warrior can be minted after the last warrior was minted.
     uint256 public constant GENERATION_COOLDOWN = 272200;
@@ -24,7 +25,7 @@ contract WarriorGeneration is WarriorPopulation{
     modifier populationCheck{
         require(
             currentGenerationPopulation() < currentGenerationMaxPopulation,
-            "Warriors: no more warrior can be minted for this generation"
+            "WarriorGeneration: no more warrior can be minted for this generation"
         );
         _;
     }
@@ -58,6 +59,7 @@ contract WarriorGeneration is WarriorPopulation{
      */
     function _endCurrentGeneration() internal{
         nextGenerationStartBlock = block.number + GENERATION_COOLDOWN;
+        _areAssetsRegistered = false;
         currentGenerationMaxPopulation = _calculateNextGenPopulation();
         populationUntilLastGeneration = warriorCounter;
         currentGeneration++;
