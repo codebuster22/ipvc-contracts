@@ -15,7 +15,7 @@ contract Warriors is ERC721 {
     uint256 public warriorCounter;
 
 
-    event WarriorGenerated(address indexed owner, uint256 indexed warriorId);
+    event WarriorGenerated(address indexed creator, uint256 indexed warriorId);
 
     /**
      * @dev constructor
