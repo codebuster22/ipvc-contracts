@@ -28,8 +28,9 @@ const logisticsCalculation = (startingPop, growthRate) => {
 describe("Contract: WarriorCore", async () => {
     let setup;
     let metadata;
+    let hash;
     let startBlockNumer = await ethers.provider.getBlockNumber();
-    let hashes = [];
+    let ipfsCid = "QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz";
     let invalid_warrior = 100;
     let initialMaxPopulation = 14020;
     let initialMaxPopulationTest = 2;
@@ -45,14 +46,14 @@ describe("Contract: WarriorCore", async () => {
                     setup.warriors
                         .connect(setup.roles.root)
                         .initialize(constants.ZERO_ADDRESS, setup.geneGenerator.address)
-                ).to.revertedWith("Controller: zero address not allowed");
+                ).to.revertedWith("WarriorCore: zero address not allowed");
             });
             it("reverts when warrior gene generator contract address zero", async () => {
                 await expect(
                     setup.warriors
                         .connect(setup.roles.root)
                         .initialize(setup.roles.origin.address, constants.ZERO_ADDRESS)
-                ).to.revertedWith("Controller: zero address not allowed");
+                ).to.revertedWith("WarriorCore: zero address not allowed");
             });
         });
         context("valid paramters", async () => {
@@ -69,7 +70,7 @@ describe("Contract: WarriorCore", async () => {
                     setup.warriors
                         .connect(setup.roles.root)
                         .initialize(setup.roles.origin.address, setup.geneGenerator.address)
-                ).to.revertedWith("Controller: already initialized");
+                ).to.revertedWith("WarriorCore: already initialized");
             });
         });
     });
@@ -97,7 +98,7 @@ describe("Contract: WarriorCore", async () => {
                         setup.warriors
                             .connect(setup.roles.beneficiary1)
                             .generateWarrior(setup.roles.beneficiary1.address, metadata, signature)
-                    ).to.revertedWith("Controller: invalid origin");
+                    ).to.revertedWith("OriginControl: invalid origin");
                 });
             });
             context("valid origin signature but before time", async () => {
@@ -110,7 +111,7 @@ describe("Contract: WarriorCore", async () => {
                         setup.warriors
                             .connect(setup.roles.beneficiary1)
                             .generateWarrior(setup.roles.beneficiary1.address, metadata, signature)
-                    ).to.revertedWith("Controller: wait for next generation warriors to arrive");
+                    ).to.revertedWith("WarriorCore: wait for next generation warriors to arrive");
                 });
             });
             context("valid signature but metadata is zero", async () => {
@@ -124,7 +125,7 @@ describe("Contract: WarriorCore", async () => {
                         setup.warriors
                             .connect(setup.roles.beneficiary1)
                             .generateWarrior(setup.roles.beneficiary1.address, constants.ZERO_BYTES32, signature)
-                    ).to.revertedWith("Warriors: cannot mint warrior without attributes");
+                    ).to.revertedWith("WarriorCore: cannot mint warrior without attributes");
                 });
             });
             context("valid signature but owner address is zero", async () => {
@@ -137,7 +138,53 @@ describe("Contract: WarriorCore", async () => {
                         setup.warriors
                             .connect(setup.roles.beneficiary1)
                             .generateWarrior(constants.ZERO_ADDRESS, metadata, signature)
-                    ).to.revertedWith("Warriors: no warrior can be assigned to zero address");
+                    ).to.revertedWith("WarriorCore: no warrior can be assigned to zero address");
+                });
+            });
+            context("trying to generate warrior before assets are registered", async () => {
+                it("reverts", async () => {
+                    const to = setup.warriors.address;
+                    const from = setup.roles.beneficiary1.address;
+                    const messageHash = await setup.warriors.generateHash(to, from, metadata);
+                    const signature = await setup.roles.origin.signMessage(ethers.utils.arrayify(messageHash));
+                    await expect(
+                        setup.warriors
+                            .connect(setup.roles.beneficiary1)
+                            .generateWarrior(setup.roles.beneficiary1.address, metadata, signature)
+                    ).to.revertedWith("WarriorCore: assets not yet registered");
+                });
+            });
+            context("register assets", async () => {
+                context("invalid data", async () => {
+                    it("reverts on invalid totalLayer", async () => {
+                        await expect(
+                            setup.warriors
+                                .connect(setup.roles.root)
+                                .registerAssets(0, constants.ZERO_BYTES32)
+                        ).to.revertedWith("WarriorAssetRegistry: cannot have zero layers");
+                    });
+                    it("reverts on invalid CID", async () => {
+                        await expect(
+                            setup.warriors
+                                .connect(setup.roles.root)
+                                .registerAssets(10, constants.ZERO_BYTES32)
+                        ).to.revertedWith("WarriorAssetRegistry: cannot have CID zero");
+                    });
+                });
+                context("valid data", async () => {
+                    it("registers asset", async () => {
+                        hash = getBytes32FromHash(ipfsCid);
+                        await expect(
+                            setup.warriors.connect(setup.roles.root).registerAssets(8, hash)
+                        ).to.emit(setup.warriors, "AssetsRegistered");
+                    });
+                });
+                context("registering assets again", async () => {
+                    it("reverts", async () => {
+                        await expect(
+                            setup.warriors.connect(setup.roles.root).registerAssets(8, hash)
+                        ).to.revertedWith("WarriorCore: assets already registered");
+                    });
                 });
             });
             context("valid origin signature", async () => {
@@ -210,12 +257,12 @@ describe("Contract: WarriorCore", async () => {
             it("reverts when not called by admin", async () => {
                 await expect(
                     setup.warriors.connect(setup.roles.beneficiary1).setOrigin(setup.roles.others[0].address)
-                ).to.revertedWith("Controller: only admin functionality");
+                ).to.revertedWith("Authorized: only admin functionality");
             });
             it("reverts when new origin address is zero", async () => {
                 await expect(
                     setup.warriors.connect(setup.roles.root).setOrigin(constants.ZERO_ADDRESS)
-                ).to.revertedWith("Controller: origin cannot be zero address");
+                ).to.revertedWith("OriginControl: origin cannot be zero address");
             });
             it("updates when called by admin", async () => {
                 await setup.warriors.connect(setup.roles.root).setOrigin(setup.roles.others[0].address);
@@ -229,12 +276,12 @@ describe("Contract: WarriorCore", async () => {
             it("reverts when not called by admin", async () => {
                 await expect(
                     setup.warriors.connect(setup.roles.beneficiary1).setGeneGenerator(setup.data.geneGenerator.address)
-                ).to.revertedWith("Controller: only admin functionality");
+                ).to.revertedWith("Authorized: only admin functionality");
             });
             it("reverts when new origin address is zero", async () => {
                 await expect(
                     setup.warriors.connect(setup.roles.root).setGeneGenerator(constants.ZERO_ADDRESS)
-                ).to.revertedWith("Controller: gene generator cannot be zero address");
+                ).to.revertedWith("WarriorCore: gene generator cannot be zero address");
             });
             it("updates when called by admin", async () => {
                 await setup.warriors.connect(setup.roles.root).setGeneGenerator(setup.data.geneGenerator.address);
@@ -242,34 +289,11 @@ describe("Contract: WarriorCore", async () => {
             });
         });
         context("registerAssets", async () => {
-            before("!! generate hash", async () => {
-                const hash = getBytes32FromHash("QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz");
-                for(let i = 0; i < 20; i++){
-                    hashes.push(hash);
-                }
-                expect(hashes.length).to.equal(20);
-            });
             context("caller is not admin", async () => {
-                it("reverts asset", async () => {
+                it("reverts", async () => {
                     await expect(
-                        setup.warriors.connect(setup.roles.beneficiary1).registerAsset(1, hashes, 0)
-                    ).to.be.revertedWith("Controller: only admin functionality");
-                });
-            });
-            context("caller is admin", async () => {
-                it("registers asset", async () => {
-                    let totalGasCost = new BN(0);
-                    let j = 0;
-                    for(j; j < 2; j++){
-                        for(let i = 0; i<4; i++){
-                            const estimate = (await setup.warriors.estimateGas.registerAsset(i, hashes, j).toString());
-                            totalGasCost = totalGasCost.add(new BN(estimate));
-                            await expect(
-                                setup.warriors.connect(setup.roles.root).registerAsset(i, hashes, j)
-                            ).to.emit(setup.warriors, "AssetForLayerRegistered");
-                        }
-                    }
-                    console.log("Gas for ",hashes.length," ",totalGasCost.toString());
+                        setup.warriors.connect(setup.roles.beneficiary1).registerAssets(8, hash)
+                    ).to.be.revertedWith("Authorized: only admin functionality");
                 });
             });
         });
@@ -277,23 +301,19 @@ describe("Contract: WarriorCore", async () => {
     context("reading asset data", async () => {
         let filter;
         before("!! set filers for events", async ( ) => {
-            filter = setup.warriors.filters.AssetRegistered();
+            filter = setup.warriors.filters.AssetsRegistered();
         });
         it("filters assets", async () => {
             let assets = {};
             setup.warriors.queryFilter(filter, startBlockNumer).then(
                 events => {
                     events.forEach(
-                        event => assets[event.args[0].toString()] = getHashFromBytes32(event.args[1])
+                        event => assets[event.args[0].toString()] = getHashFromBytes32(event.args[2])
                     );
                 }
             ).then(() => {
-                Object.keys(assets).filter(
-                    assetId => assetId.length <= 4
-                );
-                Object.keys(assets).filter(
-                    assetId => assetId.length >= 5 && parseInt(assetId.slice(0,assetId.length-4)) == 1
-                );
+                expect(Object.keys(assets)[0]).to.equal("0");
+                expect(assets[Object.keys(assets)[0]]).to.equal(ipfsCid);
             });
         });
     });
@@ -308,6 +328,9 @@ describe("Contract: WarriorCore", async () => {
             await setup.warriors
                 .connect(setup.roles.root)
                 .initialize(setup.roles.origin.address, setup.geneGenerator.address);
+            await expect(
+                setup.warriors.connect(setup.roles.root).registerAssets(8, hash)
+            ).to.emit(setup.warriors, "AssetsRegistered");
             const to = setup.warriors.address;
             const from = setup.roles.beneficiary1.address;
             const messageHash = await setup.warriors.generateHash(to, from, metadata);
