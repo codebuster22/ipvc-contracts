@@ -12,7 +12,7 @@ contract OriginControl is Authorized, SignatureHelper{
     function setOrigin(address _newOrigin) external onlyAdmin{
         require(
             _newOrigin != address(0),
-            "Controller: origin cannot be zero address"
+            "OriginControl: origin cannot be zero address"
         );
         origin = _newOrigin;
     }
@@ -26,7 +26,7 @@ contract OriginControl is Authorized, SignatureHelper{
         bytes32 ethSignedMessageHash = getEthSignedMessageHash(messageHash);
         require(
             recoverSigner(ethSignedMessageHash, _signature) == origin,
-            "Controller: invalid origin"
+            "OriginControl: invalid origin"
         );
         _;
     }
