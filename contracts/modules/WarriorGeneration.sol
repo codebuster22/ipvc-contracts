@@ -59,7 +59,7 @@ contract WarriorGeneration is WarriorPopulation, WarriorAssetRegistry{
      */
     function _endCurrentGeneration() internal{
         nextGenerationStartBlock = block.number + GENERATION_COOLDOWN;
-        _areAssetsRegistered = false;
+        areAssetsRegistered = false;
         currentGenerationMaxPopulation = _calculateNextGenPopulation();
         populationUntilLastGeneration = warriorCounter;
         currentGeneration++;

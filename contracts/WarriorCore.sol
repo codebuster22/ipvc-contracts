@@ -62,7 +62,7 @@ contract WarriorCore is OriginControl, WarriorGeneration {
             "WarriorCore: wait for next generation warriors to arrive"
         );
         require(
-            _areAssetsRegistered,
+            areAssetsRegistered,
             "WarriorCore: assets not yet registered"
         );
         bytes32 metadata = _metadata;
@@ -87,6 +87,10 @@ contract WarriorCore is OriginControl, WarriorGeneration {
     }
 
     function registerAssets(uint256 _totalLayers, bytes32 _assetsCid) public onlyAdmin {
+        require(
+            !areAssetsRegistered,
+            "WarriorCore: assets already registered"
+        );
         _registerAssets(currentGeneration, _totalLayers, _assetsCid);
     }
 }
