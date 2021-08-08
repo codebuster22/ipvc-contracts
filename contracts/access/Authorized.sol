@@ -9,7 +9,7 @@ contract Authorized{
     modifier onlyAdmin {
         require(
             msg.sender == admin,
-            "Controller: only admin functionality"
+            "Authorized: only admin functionality"
         );
         _;
     }
