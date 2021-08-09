@@ -48,6 +48,10 @@ contract WarriorCore is OriginControl, WarriorGeneration {
         bytes memory _originSignature
     ) public populationCheck onlyOrigin(_owner, _metadata, _originSignature) {
         require(
+            areAssetsRegistered,
+            "WarriorCore: assets not yet registered"
+        );
+        require(
             _metadata != bytes32(0),
             "WarriorCore: cannot mint warrior without attributes"
         );
@@ -62,10 +66,6 @@ contract WarriorCore is OriginControl, WarriorGeneration {
         require(
             isActive(),
             "WarriorCore: wait for next generation warriors to arrive"
-        );
-        require(
-            areAssetsRegistered,
-            "WarriorCore: assets not yet registered"
         );
         bytes32 metadata = _metadata;
         isMetadataUsed[_metadata] = true;
@@ -90,8 +90,8 @@ contract WarriorCore is OriginControl, WarriorGeneration {
 
     function registerAssets(uint256 _totalLayers, bytes32 _assetsCid) public onlyAdmin {
         require(
-            !areAssetsRegistered,
-            "WarriorCore: assets already registered"
+            block.number < nextGenerationStartBlock,
+            "WarriorCore: cannot change asset while sale is active"
         );
         _registerAssets(currentGeneration, _totalLayers, _assetsCid);
     }
