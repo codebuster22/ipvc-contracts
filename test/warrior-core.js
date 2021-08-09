@@ -105,46 +105,6 @@ describe("Contract: WarriorCore", async () => {
                     ).to.revertedWith("OriginControl: invalid origin");
                 });
             });
-            context("valid origin signature but before time", async () => {
-                it("reverts", async () => {
-                    const to = setup.warriors.address;
-                    const from = setup.roles.beneficiary1.address;
-                    const messageHash = await setup.warriors.generateHash(to, from, metadata);
-                    const signature = await setup.roles.origin.signMessage(ethers.utils.arrayify(messageHash));
-                    await expect(
-                        setup.warriors
-                            .connect(setup.roles.beneficiary1)
-                            .generateWarrior(setup.roles.beneficiary1.address, metadata, signature)
-                    ).to.revertedWith("WarriorCore: wait for next generation warriors to arrive");
-                });
-            });
-            context("valid signature but metadata is zero", async () => {
-                it("reverts", async () => {
-                    await time.advanceBlockTo((await time.latestBlock()).add(new BN(500)));
-                    const to = setup.warriors.address;
-                    const from = setup.roles.beneficiary1.address;
-                    const messageHash = await setup.warriors.generateHash(to, from, constants.ZERO_BYTES32);
-                    const signature = await setup.roles.origin.signMessage(ethers.utils.arrayify(messageHash));
-                    await expect(
-                        setup.warriors
-                            .connect(setup.roles.beneficiary1)
-                            .generateWarrior(setup.roles.beneficiary1.address, constants.ZERO_BYTES32, signature)
-                    ).to.revertedWith("WarriorCore: cannot mint warrior without attributes");
-                });
-            });
-            context("valid signature but owner address is zero", async () => {
-                it("reverts", async () => {
-                    await time.advanceBlockTo((await time.latestBlock()).add(new BN(500)));
-                    const to = setup.warriors.address;
-                    const messageHash = await setup.warriors.generateHash(to, constants.ZERO_ADDRESS, metadata);
-                    const signature = await setup.roles.origin.signMessage(ethers.utils.arrayify(messageHash));
-                    await expect(
-                        setup.warriors
-                            .connect(setup.roles.beneficiary1)
-                            .generateWarrior(constants.ZERO_ADDRESS, metadata, signature)
-                    ).to.revertedWith("WarriorCore: no warrior can be assigned to zero address");
-                });
-            });
             context("trying to generate warrior before assets are registered", async () => {
                 it("reverts", async () => {
                     const to = setup.warriors.address;
@@ -183,12 +143,52 @@ describe("Contract: WarriorCore", async () => {
                         ).to.emit(setup.warriors, "AssetsRegistered");
                     });
                 });
+            });
+            context("valid origin signature but before time", async () => {
+                it("reverts", async () => {
+                    const to = setup.warriors.address;
+                    const from = setup.roles.beneficiary1.address;
+                    const messageHash = await setup.warriors.generateHash(to, from, metadata);
+                    const signature = await setup.roles.origin.signMessage(ethers.utils.arrayify(messageHash));
+                    await expect(
+                        setup.warriors
+                            .connect(setup.roles.beneficiary1)
+                            .generateWarrior(setup.roles.beneficiary1.address, metadata, signature)
+                    ).to.revertedWith("WarriorCore: wait for next generation warriors to arrive");
+                });
                 context("registering assets again", async () => {
                     it("reverts", async () => {
+                        await time.advanceBlockTo((await time.latestBlock()).add(new BN(500)));
                         await expect(
                             setup.warriors.connect(setup.roles.root).registerAssets(8, hash)
-                        ).to.revertedWith("WarriorCore: assets already registered");
+                        ).to.revertedWith("WarriorCore: cannot change asset while sale is active");
                     });
+                });
+            });
+            context("valid signature but metadata is zero", async () => {
+                it("reverts", async () => {
+                    const to = setup.warriors.address;
+                    const from = setup.roles.beneficiary1.address;
+                    const messageHash = await setup.warriors.generateHash(to, from, constants.ZERO_BYTES32);
+                    const signature = await setup.roles.origin.signMessage(ethers.utils.arrayify(messageHash));
+                    await expect(
+                        setup.warriors
+                            .connect(setup.roles.beneficiary1)
+                            .generateWarrior(setup.roles.beneficiary1.address, constants.ZERO_BYTES32, signature)
+                    ).to.revertedWith("WarriorCore: cannot mint warrior without attributes");
+                });
+            });
+            context("valid signature but owner address is zero", async () => {
+                it("reverts", async () => {
+                    await time.advanceBlockTo((await time.latestBlock()).add(new BN(500)));
+                    const to = setup.warriors.address;
+                    const messageHash = await setup.warriors.generateHash(to, constants.ZERO_ADDRESS, metadata);
+                    const signature = await setup.roles.origin.signMessage(ethers.utils.arrayify(messageHash));
+                    await expect(
+                        setup.warriors
+                            .connect(setup.roles.beneficiary1)
+                            .generateWarrior(constants.ZERO_ADDRESS, metadata, signature)
+                    ).to.revertedWith("WarriorCore: no warrior can be assigned to zero address");
                 });
             });
             context("valid origin signature", async () => {
@@ -328,13 +328,13 @@ describe("Contract: WarriorCore", async () => {
             setup = await deploy();
             setup.warriors = await setup.Warriors.deploy(initialMaxPopulationTest, maxPopulation, coolDown);
             setup.geneGenerator = await setup.GeneGenerator.deploy(setup.warriors.address);
-            await time.advanceBlockTo((await time.latestBlock()).add(new BN(500)));
             await setup.warriors
                 .connect(setup.roles.root)
                 .initialize(setup.roles.origin.address, setup.geneGenerator.address);
             await expect(
                 setup.warriors.connect(setup.roles.root).registerAssets(8, hash)
             ).to.emit(setup.warriors, "AssetsRegistered");
+            await time.advanceBlockTo((await time.latestBlock()).add(new BN(500)));
             const to = setup.warriors.address;
             const from = setup.roles.beneficiary1.address;
             const messageHash = await setup.warriors.generateHash(to, from, metadata);
@@ -393,7 +393,6 @@ describe("Contract: WarriorCore", async () => {
             setup = await deploy();
             setup.warriors = await setup.Warriors.deploy(initialMaxPopulationTest, maxPopulationTest, coolDownTest);
             setup.geneGenerator = await setup.GeneGenerator.deploy(setup.warriors.address);
-            await time.advanceBlockTo((await time.latestBlock()).add(new BN(500)));
             await setup.warriors
                 .connect(setup.roles.root)
                 .initialize(setup.roles.origin.address, setup.geneGenerator.address);
@@ -401,6 +400,7 @@ describe("Contract: WarriorCore", async () => {
             await expect(
                 setup.warriors.connect(setup.roles.root).registerAssets(8, hash)
             ).to.emit(setup.warriors, "AssetsRegistered");
+            await time.advanceBlockTo((await time.latestBlock()).add(new BN(500)));
             const to = setup.warriors.address;
             const from = setup.roles.beneficiary1.address;
             messageHash = await setup.warriors.generateHash(to, from, metadata);
@@ -428,6 +428,7 @@ describe("Contract: WarriorCore", async () => {
         });
         context("trying to mint warrior before start block number", async () => {
             it("reverts", async () => {
+                await setup.warriors.connect(setup.roles.root).registerAssets(8, hash);
                 const to = setup.warriors.address;
                 const from = setup.roles.beneficiary1.address;
                 metadata = generateMetadata();
@@ -442,7 +443,6 @@ describe("Contract: WarriorCore", async () => {
         });
         context("mint last generation warrior", async () => {
             it("mints very last warrior", async () => {
-                await setup.warriors.connect(setup.roles.root).registerAssets(8, hash);
                 await time.advanceBlockTo((await time.latestBlock()).add(new BN(200)));
                 const from = setup.roles.beneficiary1.address;
                 await expect(
