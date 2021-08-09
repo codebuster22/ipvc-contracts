@@ -1,16 +1,1 @@
-{
-    "hardhat": {
-        "origin": "0x7589116F8dA3ef3934b6A7b6D398c46348d0A718",
-        "WarriorCore": "0xf77952921F542B743832823F1d8268e118d1FD97",
-        "warriorGeneGeneratorAddress": "0x4Dfe0A3EA94a590CD7303BF97AbaAE55DB280314"
-    },
-    "rinkeby": {
-        "origin": "0x7589116F8dA3ef3934b6A7b6D398c46348d0A718",
-        "WarriorCore": "0x1AfF11a7a0e106F46Fd6Ce711BBda8d08B6cD6F3",
-        "warriorGeneGeneratorAddress": "0x68621ad5cfE621c9550b57520B09C5ba953d31ce"
-    },
-    "mainnet": { "origin": "0x7589116F8dA3ef3934b6A7b6D398c46348d0A718" },
-    "localhost": { "origin": "0x7589116F8dA3ef3934b6A7b6D398c46348d0A718" },
-    "mumbai": { "origin": "0x7589116F8dA3ef3934b6A7b6D398c46348d0A718" },
-    "matic": { "origin": "0x7589116F8dA3ef3934b6A7b6D398c46348d0A718" }
-}
+{"hardhat":{"origin":"0x7589116F8dA3ef3934b6A7b6D398c46348d0A718","WarriorCore":"0xf77952921F542B743832823F1d8268e118d1FD97","warriorGeneGeneratorAddress":"0x4Dfe0A3EA94a590CD7303BF97AbaAE55DB280314"},"rinkeby":{"origin":"0x7589116F8dA3ef3934b6A7b6D398c46348d0A718","WarriorCore":"0x7bF4F936119F19DBD0CC455e48EFCB3B2926411C","warriorGeneGeneratorAddress":"0xe6a8d18B5Dbc709Fa17a20FCeDfC8edFE8D35019"},"mainnet":{"origin":"0x7589116F8dA3ef3934b6A7b6D398c46348d0A718"},"localhost":{"origin":"0x7589116F8dA3ef3934b6A7b6D398c46348d0A718"},"mumbai":{"origin":"0x7589116F8dA3ef3934b6A7b6D398c46348d0A718"},"matic":{"origin":"0x7589116F8dA3ef3934b6A7b6D398c46348d0A718"}}
