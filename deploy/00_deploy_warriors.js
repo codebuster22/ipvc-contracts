@@ -6,13 +6,15 @@ const path = require('path');
 
 module.exports = async ({getNamedAccounts, deployments, network}) => {
     console.log("Deploying contracts on ", network.name);
+    const maxPopulation = 27000000;
+    const cooldown = 272200;
     const {deploy} = deployments;
     const {deployer} = await getNamedAccounts();
     const {origin} = DeployedContracts[network.name];
     const initialMaxPop = 14020;
     const {address: warriorCoreAddress} = await deploy('WarriorCore', {
         from: deployer,
-        args: [initialMaxPop],
+        args: [initialMaxPop, maxPopulation, cooldown],
         log: true
     });
 

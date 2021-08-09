@@ -2,9 +2,10 @@ node_modules
 
 #Hardhat files
 cache
-artifacts/build-info/
-artifacts/openzeppelin-solidity/
+build/
+artifacts/
 **.dbg.json
 coverage/
+deployments/
 coverage.json
 .env
