@@ -10,7 +10,8 @@
     "deploy:contracts:rinkeby": "npx hardhat --network rinkeby deploy",
     "deploy:contracts:mainnet": "npx hardhat --network mainnet deploy",
     "deploy:contracts:mumbai": "npx hardhat --network mumbai deploy",
-    "deploy:contracts:matic": "npx hardhat --network matic deploy"
+    "deploy:contracts:matic": "npx hardhat --network matic deploy",
+    "export": "npx hardhat export --export-all contracts.json"
   },
   "dependencies": {
     "dotenv": "^10.0.0",
