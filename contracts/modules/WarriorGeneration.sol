@@ -16,12 +16,6 @@ contract WarriorGeneration is WarriorPopulation, WarriorAssetRegistry{
     // with the starting contions, it will take might 466 generations to reach 27 million warriors
     // each generation will have random and unique population, thanks to chaos
 
-    constructor(uint256 _initialMaxPopulation, uint256 _maxPopulation, uint256 _cooldown) WarriorPopulation(_initialMaxPopulation, _maxPopulation) {
-        nextGenerationStartBlock = block.number + 500;
-        GENERATION_COOLDOWN = _cooldown;
-
-    }
-
     modifier populationCheck{
         require(
             isMaxReached(),
@@ -35,16 +29,35 @@ contract WarriorGeneration is WarriorPopulation, WarriorAssetRegistry{
     }
 
     /**
+     * @dev                         constructor
+     * @param _initialMaxPopulation starting generation maximum population
+     * @param _maxPopulation        total maximum population of warriors || total supply
+     * @param _cooldown             number of blocks required for cooldown
+     */
+    constructor(uint256 _initialMaxPopulation, uint256 _maxPopulation, uint256 _cooldown) WarriorPopulation(_initialMaxPopulation, _maxPopulation) {
+        nextGenerationStartBlock = block.number + 500;
+        GENERATION_COOLDOWN = _cooldown;
+
+    }
+
+    /**
       * @dev is warrior generation active
       */
     function isActive() public view returns(bool){
         return (nextGenerationStartBlock <= block.number) && isMaxReached();
     }
 
+    /**
+     * @dev current generation warrior population
+     */
     function currentGenerationPopulation() public view returns(uint256) {
         return warriorCounter - populationUntilLastGeneration;
     }
 
+    /**
+     * @dev              get warrior's generation
+     * @param _warriorId id of warrior token
+     */
     function getWarriorGeneration(uint256 _warriorId) public view returns(uint256) {
         return (getWarrior(_warriorId)/10**72)%1000;
     }
