@@ -28,7 +28,6 @@ contract WarriorPopulation is Warriors{
 
     /**
      * @dev    checks if total maximum reached
-     * @return true if all warriors generated else false
      */
     function isMaxReached() internal view returns(bool) {
        return populationUntilLastGeneration < maxPopulation;
@@ -36,7 +35,6 @@ contract WarriorPopulation is Warriors{
 
     /**
      * @dev    calculate next generation population
-     * @return next generation population
      */
    function _calculateNextGenPopulation() internal view returns(uint256 nextGenPopulation){
       uint256 currentPopPercent = (currentGenerationMaxPopulation * PRECISION) / maxPopulationPerGen;
@@ -47,7 +45,6 @@ contract WarriorPopulation is Warriors{
 
    /**
      * @dev    to follow standard of ERC721
-     * @return maximum population of warriors.
      */
    function totalSupply() external view returns(uint256){
       return maxPopulation;
