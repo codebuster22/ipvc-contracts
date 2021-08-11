@@ -14,6 +14,9 @@ contract Authorized{
         _;
     }
 
+    /**
+     * @dev constructor
+     */
     constructor () {
         admin = msg.sender;
     }

@@ -9,14 +9,6 @@ contract OriginControl is Authorized, SignatureHelper{
 
     address public origin;                      // address from which the call to generateWarrior can be accepted
 
-    function setOrigin(address _newOrigin) external onlyAdmin{
-        require(
-            _newOrigin != address(0),
-            "OriginControl: origin cannot be zero address"
-        );
-        origin = _newOrigin;
-    }
-
     modifier onlyOrigin(
         address _from,
         bytes32 _metadata,
@@ -31,6 +23,24 @@ contract OriginControl is Authorized, SignatureHelper{
         _;
     }
 
+    /**
+     * @dev   set new origin address
+     * @param _newOrigin new origin address
+     */
+    function setOrigin(address _newOrigin) external onlyAdmin{
+        require(
+            _newOrigin != address(0),
+            "OriginControl: origin cannot be zero address"
+        );
+        origin = _newOrigin;
+    }
+
+    /**
+     * @dev             generate hash which needs to signed by origin
+     * @param _to       receiver address
+     * @param _from     sender address
+     * @param _metadata metadata
+     */
     function generateHash(
         address _to,
         address _from,

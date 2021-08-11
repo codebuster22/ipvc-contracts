@@ -27,8 +27,9 @@ contract WarriorGeneGenerator{
     }
 
     /**
-     * @dev generate warrior gene
-     * @param _metadata unique metadata using which the warrior attributes are generated
+     * @dev               generate warrior gene
+     * @param _currentGen current generation
+     * @param _metadata   unique metadata using which the warrior attributes are generated
      */
     function generateGene(uint256 _currentGen, bytes32 _metadata) public onlyCore view returns(uint256 gene){
         gene = uint256(_metadata);

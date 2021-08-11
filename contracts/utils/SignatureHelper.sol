@@ -4,6 +4,10 @@ pragma solidity ^0.8.6;
 
 contract SignatureHelper{
 
+    /**
+     * @dev                generate Eth Signer message hash
+     * @param _messageHash message hash that needs to be converted
+     */
     function getEthSignedMessageHash(
         bytes32 _messageHash
     ) public pure returns (bytes32) {
@@ -14,6 +18,11 @@ contract SignatureHelper{
         return keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", _messageHash));
     }
 
+    /**
+     * @dev                         recover signer
+     * @param _ethSignedMessageHash Eth Signed prefixed message hash
+     * @param _signature            signature
+     */
     function recoverSigner(bytes32 _ethSignedMessageHash, bytes memory _signature)
         public pure returns (address)
     {
@@ -22,6 +31,10 @@ contract SignatureHelper{
         return ecrecover(_ethSignedMessageHash, v, r, s);
     }
 
+    /**
+     * @dev       split signature
+     * @param sig signature that needs to be split
+     */
     function splitSignature(bytes memory sig)
         public pure returns (bytes32 r, bytes32 s, uint8 v)
     {

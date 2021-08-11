@@ -18,12 +18,23 @@ contract WarriorCore is OriginControl, WarriorGeneration {
 
     mapping (bytes32 => bool) public isMetadataUsed;
 
+    /**
+     * @dev                         constructor
+     * @param _initialMaxPopulation starting generation maximum population
+     * @param _maxPopulation        total maximum population of warriors || total supply
+     * @param _cooldown             number of blocks required for cooldown
+     */
     constructor (
         uint256 _initialMaxPopulation,
         uint256 _maxPopulation,
         uint256 _cooldown
     ) WarriorGeneration(_initialMaxPopulation, _maxPopulation, _cooldown) { }
 
+    /**
+     * @dev                                 initialize contract
+     * @param _origin                       origin address
+     * @param _warriorGeneGeneratorContract warrior gene generator contract address
+     */
     function initialize(
         address _origin,
         address _warriorGeneGeneratorContract
@@ -42,6 +53,12 @@ contract WarriorCore is OriginControl, WarriorGeneration {
         isInitialized = true;
     }
 
+    /**
+     * @dev                    generate warrior
+     * @param _owner           owner address
+     * @param _metadata        metadata
+     * @param _originSignature signature to verify the transaction was sent from dapp
+     */
     function generateWarrior(
         address _owner,
         bytes32 _metadata,
@@ -80,6 +97,10 @@ contract WarriorCore is OriginControl, WarriorGeneration {
         revert("WarriorCore: gene already used");
     }
 
+    /**
+     * @dev                     set gene generator contract address
+     * @param _newGeneGenerator new gene generator address
+     */
     function setGeneGenerator(address _newGeneGenerator) external onlyAdmin{
         require(
             _newGeneGenerator != address(0),
@@ -88,6 +109,11 @@ contract WarriorCore is OriginControl, WarriorGeneration {
         warriorGeneGeneratorContract = _newGeneGenerator;
     }
 
+    /**
+     * @dev                register assets for a generation
+     * @param _totalLayers total layers of warrior
+     * @param _assetsCid   asset registry ipfs hash
+     */
     function registerAssets(uint256 _totalLayers, bytes32 _assetsCid) public onlyAdmin {
         require(
             block.number < nextGenerationStartBlock,

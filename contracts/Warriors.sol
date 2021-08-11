@@ -23,8 +23,8 @@ contract Warriors is ERC721 {
     constructor () ERC721("Warriors","WRT") {}
 
     /**
-      * @dev generateWarrior
-      * @param _gene warrior gene for the token
+      * @dev          generateWarrior
+      * @param _gene  warrior gene for the token
       * @param _owner address of owner who requested to generate warrior
       */
     function _generateWarrior(uint256 _gene, address _owner) internal {
