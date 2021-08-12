@@ -5,7 +5,6 @@ import "./Warriors.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract WarriorNFTAuction is IERC721Receiver {
-    using SafeMath for uint256;
     
     struct Auction {
         address seller;
@@ -16,7 +15,7 @@ contract WarriorNFTAuction is IERC721Receiver {
         bool auctionComplete;
     }
 
-    Warriors public _warrior;
+    Warriors public warrior;
 
     mapping(uint256 => Auction) public tokenIdToAuction;
     mapping(uint256 => mapping(address => uint256)) public returnsPending;
@@ -26,13 +25,13 @@ contract WarriorNFTAuction is IERC721Receiver {
     event IncreaseCurrentBid(address bidder, uint256 bidAmount);
 
     modifier warriorOwner(uint _tokenId) {
-        address _warriorOwner = _warrior.ownerOf(_tokenId);
-        require(msg.sender == _warriorOwner, "The message sender is not the owner of the Warriors");
+        address warriorOwner = warrior.ownerOf(_tokenId);
+        require(msg.sender == warriorOwner, "The message sender is not the owner of the Warrior");
         _;
     }
 
-    constructor(address warrior) {
-        _warrior = Warriors(warrior);
+    constructor(address warriors) {
+        warrior = Warriors(warriors);
     }
 
     function createAuction(
@@ -41,7 +40,7 @@ contract WarriorNFTAuction is IERC721Receiver {
         uint256 _biddingTime
     ) public warriorOwner(_tokenId) {
         
-        _warrior.safeTransferFrom(msg.sender, address(this), _tokenId);
+        warrior.safeTransferFrom(msg.sender, address(this), _tokenId);
 
         Auction memory _auction = Auction({
             seller: msg.sender,
@@ -58,10 +57,10 @@ contract WarriorNFTAuction is IERC721Receiver {
     function bid(uint256 _tokenId) public payable {
         Auction storage _auction = tokenIdToAuction[_tokenId];
 
-        require(_auction.seller != msg.sender);
-        require(msg.value >= _auction.basePrice);
-        require(block.timestamp <= _auction.endTime);
-        require(msg.value >= _auction.highestBid);
+        require(_auction.seller != msg.sender,"The message sender is the seller!");
+        require(msg.value >= _auction.basePrice,"Base price exceeds the limit!");
+        require(block.timestamp <= _auction.endTime,"Auction already ended!");
+        require(msg.value >= _auction.highestBid,"Invalid bid!");
 
         _auction.highestBidder = msg.sender;
         _auction.highestBid = msg.value;
@@ -78,7 +77,7 @@ contract WarriorNFTAuction is IERC721Receiver {
     function withdraw(uint256 _tokenId) public returns (bool) {
         Auction memory _auction = tokenIdToAuction[_tokenId];
 
-        require(msg.sender != _auction.highestBidder);
+        require(msg.sender != _auction.highestBidder,"You're the highest bidder!");
 
         uint256 bidAmount = returnsPending[_tokenId][msg.sender];
         if (bidAmount > 0) {
@@ -95,9 +94,9 @@ contract WarriorNFTAuction is IERC721Receiver {
     function increaseCurrentBid(uint256 _tokenId) public payable {
         Auction storage _auction = tokenIdToAuction[_tokenId];
 
-        require(returnsPending[_tokenId][msg.sender] != 0);
-        require(_auction.highestBidder != msg.sender);
-        require(returnsPending[_tokenId][msg.sender].add(msg.value) >= _auction.highestBid);
+        require(returnsPending[_tokenId][msg.sender] != 0,"Value cannot be zero!");
+        require(_auction.highestBidder != msg.sender,"You're the highest bidder!");
+        require(returnsPending[_tokenId][msg.sender].add(msg.value) >= _auction.highestBid,"Value is lesser than highest bid!");
 
         _auction.highestBidder = msg.sender;
         uint256 newBidAmount = returnsPending[_tokenId][ _auction.highestBidder].add(msg.value);
@@ -113,7 +112,7 @@ contract WarriorNFTAuction is IERC721Receiver {
 
         //   require(block.timestamp >= _auction.endTime);
 
-        require(!_auction.auctionComplete);
+        require(!_auction.auctionComplete,"Auction ended!");
 
         _auction.auctionComplete = true;
 
@@ -129,7 +128,7 @@ contract WarriorNFTAuction is IERC721Receiver {
             amountToThirdParty
         );
 
-        _warrior.safeTransferFrom(address(this), _auction.highestBidder, _tokenId);
+        warrior.safeTransferFrom(address(this), _auction.highestBidder, _tokenId);
 
         emit AuctionResult(_auction.highestBidder, _auction.highestBid);
     }
@@ -137,11 +136,11 @@ contract WarriorNFTAuction is IERC721Receiver {
     function cancelAuction(uint256 _tokenId) public warriorOwner(_tokenId) returns (bool)  {
         Auction memory _auction = tokenIdToAuction[_tokenId];
 
-        require(_auction.seller == msg.sender);
+        require(_auction.seller == msg.sender,"You're not the seller!");
 
         delete tokenIdToAuction[_tokenId];
 
-        _warrior.safeTransferFrom(address(this), _auction.seller, _tokenId);
+        warrior.safeTransferFrom(address(this), _auction.seller, _tokenId);
 
         return true;
     }
