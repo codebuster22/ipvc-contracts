@@ -2,7 +2,6 @@
 pragma solidity ^0.8.6;
 
 import "./Warriors.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract WarriorNFTAuction is IERC721Receiver {
     
