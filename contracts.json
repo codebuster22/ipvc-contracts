@@ -5,7 +5,7 @@
       "chainId": "4",
       "contracts": {
         "WarriorCore": {
-          "address": "0x7bF4F936119F19DBD0CC455e48EFCB3B2926411C",
+          "address": "0x70E120170bA836f50B824Efa0b67B42aC1CACB2A",
           "abi": [
             {
               "inputs": [
@@ -940,7 +940,7 @@
           ]
         },
         "WarriorGeneGenerator": {
-          "address": "0xe6a8d18B5Dbc709Fa17a20FCeDfC8edFE8D35019",
+          "address": "0x88828abb899417eDef9abE4a8c97ac7EBdB5217D",
           "abi": [
             {
               "inputs": [
